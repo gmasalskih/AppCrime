@@ -61,8 +61,7 @@ class CrimeListFragment : Fragment() {
             mDateTextView.text = mCrime.mDate.toFormattedString()
             mSolvedImageView.visibility = if (crime.mSolved) View.VISIBLE else View.GONE
             itemView.setOnClickListener {
-                val intent = CrimeActivity.newIntent(activity as Context, mCrime.mId)
-                startActivity(intent)
+                startActivity(CrimePagerActivity.newIntent(activity as Context, mCrime.mId))
             }
         }
     }
