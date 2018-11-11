@@ -5,6 +5,6 @@ import java.util.*
 data class Crime(
     val mId: UUID = UUID.randomUUID(),
     var mTitle: String = "",
-    val mDate: Date = Date(),
+    var mDate: Date = Date(),
     var mSolved: Boolean = false
 )

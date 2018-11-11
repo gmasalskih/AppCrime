@@ -1,6 +1,8 @@
 package com.example.gmasalskih.appcrime
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.Editable
@@ -11,12 +13,15 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import com.example.gmasalskih.appcrime.Utils.toFormattedString
 import java.util.*
 
 class CrimeFragment : Fragment() {
 
     companion object {
         private const val ARG_CRIME_ID = "crime_id"
+        private const val DIALOG_DATE = "DialogDate"
+        private const val REQUEST_DATE = 0
         fun newInstance(crimeId: UUID): CrimeFragment {
             val args: Bundle = Bundle().apply {
                 putSerializable(ARG_CRIME_ID, crimeId)
@@ -56,8 +61,12 @@ class CrimeFragment : Fragment() {
         })
 
         mDateButton = v.findViewById(R.id.crime_date)
-        mDateButton.text = mCrime.mDate.toString()
-        mDateButton.isEnabled = false
+        updateDate()
+        mDateButton.setOnClickListener {
+            val dialog = DatePickerFragment.newInstance(mCrime.mDate)
+            dialog.setTargetFragment(this, REQUEST_DATE)
+            dialog.show(fragmentManager, DIALOG_DATE)
+        }
 
         mSolvedCheckBox = v.findViewById(R.id.crime_solved)
         mSolvedCheckBox.isChecked = mCrime.mSolved
@@ -66,5 +75,19 @@ class CrimeFragment : Fragment() {
         }
 
         return v
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_DATE) {
+            val date = data?.getSerializableExtra(DatePickerFragment.EXTRA_DATE)
+            if (date != null) {
+                mCrime.mDate = date as Date
+                updateDate()
+            }
+        }
+    }
+
+    private fun updateDate() {
+        mDateButton.text = mCrime.mDate.toFormattedString()
     }
 }
