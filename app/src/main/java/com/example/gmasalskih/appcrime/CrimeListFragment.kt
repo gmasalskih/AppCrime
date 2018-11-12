@@ -1,19 +1,15 @@
 package com.example.gmasalskih.appcrime
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import com.example.gmasalskih.appcrime.Utils.toFormattedString
 
 class CrimeListFragment : Fragment() {
@@ -33,6 +29,11 @@ class CrimeListFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         updateUI()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater?.inflate(R.menu.fragment_crime_list, menu)
     }
 
     private fun updateUI() {
