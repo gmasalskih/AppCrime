@@ -14,15 +14,14 @@ class CrimeLab private constructor(context: Context) {
         }
     }
 
-    private var mCrimes = List(100) {
-        val crime = Crime()
-        crime.mTitle = "Crime #$it"
-        crime.mSolved = it % 2 == 0
-        crime
-    }
+    private var mCrimes = mutableListOf<Crime>()
 
     fun getCrimes() = mCrimes
 
     fun getCrime(id: UUID) = mCrimes.single { it.mId == id }
+
+    fun addCrime(crime: Crime) {
+        mCrimes.add(crime)
+    }
 
 }
