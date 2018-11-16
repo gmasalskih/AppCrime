@@ -14,6 +14,8 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import com.example.gmasalskih.appcrime.Utils.toFormattedString
+import com.example.gmasalskih.appcrime.database.CrimeBaseHelper
+import com.example.gmasalskih.appcrime.database.CrimeDbSchema
 import java.util.*
 
 class CrimeFragment : Fragment() {
@@ -75,6 +77,11 @@ class CrimeFragment : Fragment() {
         }
 
         return v
+    }
+
+    override fun onPause() {
+        super.onPause()
+        CrimeLab.get(activity as Context).updateCrime(mCrime)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
