@@ -1,7 +1,6 @@
 package com.example.gmasalskih.appcrime
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -98,6 +97,7 @@ class CrimeListFragment : Fragment() {
             mAdapter = CrimeAdapter(crimes)
             mCrimeRecyclerView.adapter = mAdapter
         } else {
+            mAdapter?.setCrimes(crimes)
             mAdapter?.notifyDataSetChanged()
         }
         updateSubtitle()
@@ -123,7 +123,7 @@ class CrimeListFragment : Fragment() {
         }
     }
 
-    private inner class CrimeAdapter(val mCrimes: List<Crime>) : RecyclerView.Adapter<CrimeHolder>() {
+    private inner class CrimeAdapter(var mCrimes: List<Crime>) : RecyclerView.Adapter<CrimeHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {
             val layoutInflater: LayoutInflater = LayoutInflater.from(activity)
@@ -143,6 +143,10 @@ class CrimeListFragment : Fragment() {
         override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
             val crime: Crime = mCrimes[position]
             holder.bind(crime)
+        }
+
+        public fun setCrimes(crimes:List<Crime>){
+            mCrimes = crimes
         }
     }
 }

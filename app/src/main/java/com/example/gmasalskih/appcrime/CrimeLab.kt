@@ -2,8 +2,8 @@ package com.example.gmasalskih.appcrime
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import com.example.gmasalskih.appcrime.database.CrimeBaseHelper
+import com.example.gmasalskih.appcrime.database.CrimeCursorWrapper
 
 import com.example.gmasalskih.appcrime.database.CrimeDbSchema.*
 import java.util.*
@@ -28,32 +28,44 @@ class CrimeLab private constructor(context: Context) {
         }
     }
 
-    //    private var mCrimes = mutableListOf<Crime>()
     private var mContext: Context = context.applicationContext
-    private val mDatebase = CrimeBaseHelper(mContext).writableDatabase
-
+    private val mDateBase = CrimeBaseHelper(mContext).writableDatabase
 
     fun getCrimes(): List<Crime> {
-
-        return mutableListOf()
+        val crimes = mutableListOf<Crime>()
+        val cursor = queryCrimes(null, null)
+        cursor.use {
+            it.moveToFirst()
+            while (!it.isAfterLast) {
+                crimes.add(it.getCrime())
+                it.moveToNext()
+            }
+        }
+        return crimes.toList()
     }
 
     fun getCrime(id: UUID): Crime {
-
-
-        return Crime()
+        val cursor = queryCrimes(
+            "${CrimeTable.Cols.UUID} = ?",
+            Array(1) { "$id" }
+        )
+        return cursor.use {
+            if (it.count == 0) return Crime()
+            it.moveToFirst()
+            it.getCrime()
+        }
     }
 
     fun updateCrime(crime: Crime) {
-        mDatebase.update(CrimeTable.NAME,
+        mDateBase.update(CrimeTable.NAME,
             getContentValues(crime),
             "${CrimeTable.Cols.UUID} = ?",
             Array(1) { "${crime.mId}" }
         )
     }
 
-    fun queryCrimes(whereClause: String, whereArgs: Array<String>): Cursor {
-        return mDatebase.query(
+    fun queryCrimes(whereClause: String?, whereArgs: Array<String>?): CrimeCursorWrapper {
+        val cursor = mDateBase.query(
             CrimeTable.NAME,
             null,
             whereClause,
@@ -62,10 +74,11 @@ class CrimeLab private constructor(context: Context) {
             null,
             null
         )
+        return CrimeCursorWrapper(cursor)
     }
 
     fun addCrime(crime: Crime) {
-        mDatebase.insert(CrimeTable.NAME, null, getContentValues(crime))
+        mDateBase.insert(CrimeTable.NAME, null, getContentValues(crime))
     }
 
 }
