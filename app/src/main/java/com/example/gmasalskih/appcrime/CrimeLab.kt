@@ -81,4 +81,12 @@ class CrimeLab private constructor(context: Context) {
         mDateBase.insert(CrimeTable.NAME, null, getContentValues(crime))
     }
 
+    fun delCrimeById(id: UUID) {
+        mDateBase.delete(
+            CrimeTable.NAME,
+            "${CrimeTable.Cols.UUID} = ?",
+            Array(1) { "$id" }
+        )
+    }
+
 }

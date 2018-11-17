@@ -1,6 +1,8 @@
 package com.example.gmasalskih.appcrime
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -12,6 +14,7 @@ import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import com.example.gmasalskih.appcrime.Utils.toFormattedString
+import java.util.*
 
 class CrimeListFragment : Fragment() {
 
@@ -21,6 +24,8 @@ class CrimeListFragment : Fragment() {
 
     companion object {
         const val SAVED_SUBTITLE_VISIBLE = "subtitle"
+        const val DELETE = "delete"
+        const val REQUEST_DATE = 0
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,6 +108,14 @@ class CrimeListFragment : Fragment() {
         updateSubtitle()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_DATE) {
+            val id = data?.getSerializableExtra(DeleteCrimeFragment.RESULT) as UUID
+            CrimeLab.get(activity as Context).delCrimeById(id)
+            updateUI()
+        }
+    }
+
     private inner class CrimeHolder(val inflater: LayoutInflater, val parent: ViewGroup, val viewType: Int) :
         RecyclerView.ViewHolder(inflater.inflate(R.layout.list_item_crime, parent, false)) {
 
@@ -119,6 +132,15 @@ class CrimeListFragment : Fragment() {
             mSolvedImageView.visibility = if (crime.mSolved) View.VISIBLE else View.GONE
             itemView.setOnClickListener {
                 startActivity(CrimePagerActivity.newIntent(activity as Context, mCrime.mId))
+            }
+            itemView.setOnLongClickListener {
+                //                updateUI()
+                val fm = fragmentManager
+                val deleteDialog = DeleteCrimeFragment.newInstance(mCrime.mTitle, mCrime.mId)
+                deleteDialog.setTargetFragment(this@CrimeListFragment, REQUEST_DATE)
+                deleteDialog.show(fm, DELETE)
+
+                true
             }
         }
     }
@@ -145,7 +167,7 @@ class CrimeListFragment : Fragment() {
             holder.bind(crime)
         }
 
-        public fun setCrimes(crimes:List<Crime>){
+        public fun setCrimes(crimes: List<Crime>) {
             mCrimes = crimes
         }
     }

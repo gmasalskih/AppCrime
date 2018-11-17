@@ -14,8 +14,6 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import com.example.gmasalskih.appcrime.Utils.toFormattedString
-import com.example.gmasalskih.appcrime.database.CrimeBaseHelper
-import com.example.gmasalskih.appcrime.database.CrimeDbSchema
 import java.util.*
 
 class CrimeFragment : Fragment() {
@@ -58,7 +56,9 @@ class CrimeFragment : Fragment() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                mCrime.mTitle = s.toString()
+                val str = s.toString().trim()
+                if(str == "") mCrime.mTitle = "No Title"
+                else mCrime.mTitle = str
             }
         })
 
