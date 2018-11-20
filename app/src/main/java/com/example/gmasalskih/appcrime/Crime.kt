@@ -7,5 +7,5 @@ data class Crime(
     var mTitle: String = "",
     var mDate: Date = Date(),
     var mSolved: Boolean = false,
-    var mSuspect: String?
+    var mSuspect: String? = null
 )

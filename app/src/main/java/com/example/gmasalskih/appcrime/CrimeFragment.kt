@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.support.v4.app.Fragment
 import android.text.Editable
 import android.text.TextWatcher
@@ -23,6 +24,7 @@ class CrimeFragment : Fragment() {
         private const val ARG_CRIME_ID = "crime_id"
         private const val DIALOG_DATE = "DialogDate"
         private const val REQUEST_DATE = 0
+        private const val REQUEST_CONTACT = 1
         fun newInstance(crimeId: UUID): CrimeFragment {
             val args: Bundle = Bundle().apply {
                 putSerializable(ARG_CRIME_ID, crimeId)
@@ -38,6 +40,7 @@ class CrimeFragment : Fragment() {
     private lateinit var mDateButton: Button
     private lateinit var mSolvedCheckBox: CheckBox
     private lateinit var mReportButton: Button
+    private lateinit var mSuspectButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,11 +84,21 @@ class CrimeFragment : Fragment() {
         mReportButton = v.findViewById(R.id.crime_report)
         mReportButton.setOnClickListener {
             val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, getCrimeReport())
                 putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject))
             }
-            startActivity(intent)
+            startActivity(Intent.createChooser(intent, getString(R.string.send_report)))
         }
+
+        mSuspectButton = v.findViewById(R.id.crime_suspect)
+        mSuspectButton.setOnClickListener {
+            startActivityForResult(
+                Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI),
+                REQUEST_CONTACT
+            )
+        }
+        if(mCrime.mSuspect != null) mSuspectButton.text = mCrime.mSuspect
 
         return v
     }
