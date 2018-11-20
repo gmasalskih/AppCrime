@@ -3,6 +3,7 @@ package com.example.gmasalskih.appcrime
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.support.v4.app.Fragment
@@ -92,13 +93,15 @@ class CrimeFragment : Fragment() {
         }
 
         mSuspectButton = v.findViewById(R.id.crime_suspect)
+        val pickContact = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
         mSuspectButton.setOnClickListener {
-            startActivityForResult(
-                Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI),
-                REQUEST_CONTACT
-            )
+            startActivityForResult(pickContact, REQUEST_CONTACT)
         }
-        if(mCrime.mSuspect != null) mSuspectButton.text = mCrime.mSuspect
+        if (mCrime.mSuspect != null) mSuspectButton.text = mCrime.mSuspect
+
+        val pm = activity?.packageManager
+        if (pm?.resolveActivity(pickContact, PackageManager.MATCH_DEFAULT_ONLY) == null)
+            mSuspectButton.isEnabled = false
 
         return v
     }
@@ -109,11 +112,30 @@ class CrimeFragment : Fragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_DATE) {
-            val date = data?.getSerializableExtra(DatePickerFragment.EXTRA_DATE)
-            if (date != null) {
-                mCrime.mDate = date as Date
-                updateDate()
+        if (resultCode != Activity.RESULT_OK) return
+        when (requestCode) {
+            REQUEST_DATE -> {
+                val date = data?.getSerializableExtra(DatePickerFragment.EXTRA_DATE)
+                if (date != null) {
+                    mCrime.mDate = date as Date
+                    updateDate()
+                }
+            }
+            REQUEST_CONTACT -> {
+                if (data != null) {
+                    val contactUri = data.data
+                    val queryFields = Array<String>(1) {
+                        ContactsContract.Contacts.DISPLAY_NAME
+                    }
+                    activity?.contentResolver?.query(contactUri, queryFields, null, null, null).use { cursor ->
+                        if (cursor == null || cursor.count == 0) return
+                        cursor.moveToFirst()
+                        cursor.getString(0).let { str ->
+                            mCrime.mSuspect = str
+                            mSuspectButton.text = str
+                        }
+                    }
+                }
             }
         }
     }
