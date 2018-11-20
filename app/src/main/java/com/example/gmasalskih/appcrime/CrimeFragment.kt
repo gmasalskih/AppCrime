@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +37,7 @@ class CrimeFragment : Fragment() {
     private lateinit var mTitleField: EditText
     private lateinit var mDateButton: Button
     private lateinit var mSolvedCheckBox: CheckBox
+    private lateinit var mReportButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +59,7 @@ class CrimeFragment : Fragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val str = s.toString().trim()
-                if(str == "") mCrime.mTitle = "No Title"
+                if (str == "") mCrime.mTitle = "No Title"
                 else mCrime.mTitle = str
             }
         })
@@ -74,6 +76,15 @@ class CrimeFragment : Fragment() {
         mSolvedCheckBox.isChecked = mCrime.mSolved
         mSolvedCheckBox.setOnCheckedChangeListener { _, isChecked ->
             mCrime.mSolved = isChecked
+        }
+
+        mReportButton = v.findViewById(R.id.crime_report)
+        mReportButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                putExtra(Intent.EXTRA_TEXT, getCrimeReport())
+                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject))
+            }
+            startActivity(intent)
         }
 
         return v
@@ -96,5 +107,18 @@ class CrimeFragment : Fragment() {
 
     private fun updateDate() {
         mDateButton.text = mCrime.mDate.toFormattedString()
+    }
+
+    private fun getCrimeReport(): String {
+        val solvedString = if (mCrime.mSolved) getString(R.string.crime_report_solved)
+        else getString(R.string.crime_report_unsolved)
+
+        val dateFormat = "EEE, MMM dd"
+        val dateString = DateFormat.format(dateFormat, mCrime.mDate).toString()
+
+        val suspect: String = if (mCrime.mSuspect == null) getString(R.string.crime_report_no_suspect)
+        else getString(R.string.crime_report_suspect, mCrime.mSuspect)
+
+        return getString(R.string.crime_report, mCrime.mTitle, dateString, solvedString, suspect)
     }
 }

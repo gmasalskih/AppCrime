@@ -21,7 +21,8 @@ class CrimeBaseHelper(val context : Context): SQLiteOpenHelper(context, DATABASE
             ${CrimeTable.Cols.UUID},
             ${CrimeTable.Cols.TITLE},
             ${CrimeTable.Cols.DATE},
-            ${CrimeTable.Cols.SOLVED}
+            ${CrimeTable.Cols.SOLVED},
+            ${CrimeTable.Cols.SUSPECT}
             )
         """.trimIndent())
     }

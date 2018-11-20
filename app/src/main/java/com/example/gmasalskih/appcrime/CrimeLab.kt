@@ -24,6 +24,7 @@ class CrimeLab private constructor(context: Context) {
                 put(CrimeTable.Cols.DATE, crime.mDate.time)
                 put(CrimeTable.Cols.SOLVED, if (crime.mSolved) 1 else 0)
                 put(CrimeTable.Cols.TITLE, crime.mTitle)
+                put(CrimeTable.Cols.SUSPECT, crime.mSuspect)
             }
         }
     }
