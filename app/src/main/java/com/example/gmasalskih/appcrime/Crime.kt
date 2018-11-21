@@ -8,4 +8,8 @@ data class Crime(
     var mDate: Date = Date(),
     var mSolved: Boolean = false,
     var mSuspect: String? = null
-)
+) {
+    public fun getPhotoFilename(): String {
+        return "IMG_${mId}.jpg"
+    }
+}

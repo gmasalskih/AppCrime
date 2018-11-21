@@ -6,17 +6,18 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.provider.MediaStore
 import android.support.v4.app.Fragment
+import android.support.v4.content.FileProvider
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
+import android.widget.*
 import com.example.gmasalskih.appcrime.Utils.toFormattedString
+import java.io.File
 import java.util.*
 
 class CrimeFragment : Fragment() {
@@ -26,6 +27,7 @@ class CrimeFragment : Fragment() {
         private const val DIALOG_DATE = "DialogDate"
         private const val REQUEST_DATE = 0
         private const val REQUEST_CONTACT = 1
+        private const val REQUEST_PHOTO = 2
         fun newInstance(crimeId: UUID): CrimeFragment {
             val args: Bundle = Bundle().apply {
                 putSerializable(ARG_CRIME_ID, crimeId)
@@ -42,11 +44,16 @@ class CrimeFragment : Fragment() {
     private lateinit var mSolvedCheckBox: CheckBox
     private lateinit var mReportButton: Button
     private lateinit var mSuspectButton: Button
+    private lateinit var mPhotoButton: ImageButton
+    private lateinit var mPhotoView: ImageView
+    private lateinit var mPhotoFile: File
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val crimeId = arguments?.getSerializable(ARG_CRIME_ID) as UUID
         mCrime = CrimeLab.get(activity as Context).getCrime(crimeId)
+        mPhotoFile = CrimeLab.get(activity as Context).getPhotoFile(mCrime)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -103,6 +110,30 @@ class CrimeFragment : Fragment() {
         if (pm?.resolveActivity(pickContact, PackageManager.MATCH_DEFAULT_ONLY) == null)
             mSuspectButton.isEnabled = false
 
+        mPhotoButton = v.findViewById(R.id.crime_camera)
+        mPhotoView = v.findViewById(R.id.crime_photo)
+
+        val captureImage = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        val canTakePhoto = mPhotoFile != null && captureImage.resolveActivity(pm) != null
+        mPhotoButton.isEnabled = canTakePhoto
+        mPhotoButton.setOnClickListener {
+            val uri = FileProvider.getUriForFile(
+                activity as Context,
+                "com.example.gmasalskih.appcrime.fileprovider",
+                mPhotoFile
+            )
+            captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+            val cameraActivities = pm?.queryIntentActivities(captureImage, PackageManager.MATCH_DEFAULT_ONLY)
+            cameraActivities?.forEach { resolveInfo ->
+                activity?.grantUriPermission(
+                    resolveInfo.activityInfo.packageName,
+                    uri,
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+            }
+            startActivityForResult(captureImage, REQUEST_PHOTO)
+        }
+
         return v
     }
 
@@ -124,7 +155,7 @@ class CrimeFragment : Fragment() {
             REQUEST_CONTACT -> {
                 if (data != null) {
                     val contactUri = data.data
-                    val queryFields = Array<String>(1) {
+                    val queryFields = Array(1) {
                         ContactsContract.Contacts.DISPLAY_NAME
                     }
                     activity?.contentResolver?.query(contactUri, queryFields, null, null, null).use { cursor ->

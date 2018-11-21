@@ -6,6 +6,7 @@ import com.example.gmasalskih.appcrime.database.CrimeBaseHelper
 import com.example.gmasalskih.appcrime.database.CrimeCursorWrapper
 
 import com.example.gmasalskih.appcrime.database.CrimeDbSchema.*
+import java.io.File
 import java.util.*
 
 class CrimeLab private constructor(context: Context) {
@@ -55,6 +56,10 @@ class CrimeLab private constructor(context: Context) {
             it.moveToFirst()
             it.getCrime()
         }
+    }
+
+    fun getPhotoFile(crime: Crime): File {
+        return File(mContext.filesDir, crime.getPhotoFilename())
     }
 
     fun updateCrime(crime: Crime) {
