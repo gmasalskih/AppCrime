@@ -16,6 +16,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.example.gmasalskih.appcrime.Utils.PictureUtils
 import com.example.gmasalskih.appcrime.Utils.toFormattedString
 import java.io.File
 import java.util.*
@@ -47,7 +48,6 @@ class CrimeFragment : Fragment() {
     private lateinit var mPhotoButton: ImageButton
     private lateinit var mPhotoView: ImageView
     private lateinit var mPhotoFile: File
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,6 +133,7 @@ class CrimeFragment : Fragment() {
             }
             startActivityForResult(captureImage, REQUEST_PHOTO)
         }
+        updatePhotoView()
 
         return v
     }
@@ -168,6 +169,11 @@ class CrimeFragment : Fragment() {
                     }
                 }
             }
+            REQUEST_PHOTO -> {
+                val uri = FileProvider.getUriForFile(activity as Context, "com.example.gmasalskih.appcrime.fileprovider", mPhotoFile)
+                activity?.revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                updatePhotoView()
+            }
         }
     }
 
@@ -186,5 +192,14 @@ class CrimeFragment : Fragment() {
         else getString(R.string.crime_report_suspect, mCrime.mSuspect)
 
         return getString(R.string.crime_report, mCrime.mTitle, dateString, solvedString, suspect)
+    }
+
+    private fun updatePhotoView() {
+        if (mPhotoFile == null || !mPhotoFile.exists()) {
+            mPhotoView.setImageDrawable(null)
+        } else {
+            val bitmap = PictureUtils.getScaledBitmap(mPhotoFile.path, activity as Activity)
+            mPhotoView.setImageBitmap(bitmap)
+        }
     }
 }
